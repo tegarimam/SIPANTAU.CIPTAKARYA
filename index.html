@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script>
-        // Konfigurasi Tailwind untuk Dark Mode manual
         tailwind.config = {
             darkMode: 'class',
         }
@@ -17,8 +16,6 @@
         .tab-active { border-bottom: 4px solid #facc15; color: #facc15; }
         .animate-fadeIn { animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        
-        /* Transisi halus saat ganti tema */
         body { transition: background-color 0.3s, color 0.3s; }
     </style>
 </head>
@@ -33,14 +30,24 @@
                     <p class="text-[10px] tracking-[0.2em] font-bold text-yellow-400 uppercase">DPRKPCK Prov. Jawa Timur</p>
                 </div>
             </div>
-            <button id="themeBtn" class="p-2 hover:bg-blue-800 dark:hover:bg-gray-800 rounded-lg transition" title="Ganti Mode Terang/Gelap">
-                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
-            </button>
+            
+            <div class="relative">
+                <button id="menuBtn" class="p-2 hover:bg-blue-800 dark:hover:bg-gray-800 rounded-lg transition">
+                    <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
+                </button>
+                <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border dark:border-gray-700 z-50 overflow-hidden">
+                    <button onclick="setTheme('light')" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-200">
+                        ☀️ Mode Pagi
+                    </button>
+                    <button onclick="setTheme('dark')" class="w-full text-left px-4 py-3 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2 text-gray-700 dark:text-gray-200 border-t dark:border-gray-700">
+                        🌙 Mode Malam
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
     <div class="max-w-7xl mx-auto p-4 md:p-8">
-        
         <div class="flex space-x-6 border-b-2 dark:border-gray-700 mb-8 text-xs font-bold text-gray-400 overflow-x-auto whitespace-nowrap px-2">
             <button onclick="switchTab('library')" id="tab-library" class="pb-3 tab-active uppercase">📂 Wadah SNI</button>
             <button onclick="switchTab('koreksi')" id="tab-koreksi" class="pb-3 uppercase">🔍 Cek Excel (Auto)</button>
@@ -62,6 +69,10 @@
                             <span>SNI 1727-2020 (Beban)</span>
                             <span class="text-[10px] bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 px-2 py-1 rounded font-bold uppercase">Buka</span>
                         </a>
+                        <a href="SNI 1726-2012.pdf" target="_blank" class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 flex justify-between items-center hover:bg-blue-50 dark:hover:bg-blue-900 transition text-gray-800 dark:text-gray-200">
+                            <span>SNI 1726-2012 (Gempa)</span>
+                            <span class="text-[10px] bg-blue-100 dark:bg-blue-800 text-blue-800 dark:text-blue-100 px-2 py-1 rounded font-bold uppercase">Buka</span>
+                        </a>
                     </div>
                 </div>
 
@@ -72,15 +83,51 @@
                             <span>SNI 1729-2020 (Baja)</span>
                             <span class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded font-bold uppercase">Buka</span>
                         </a>
+                        <a href="SNI 8460-2017 Persyaratan Perancangan Geoteknik.pdf" target="_blank" class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-600 transition text-gray-800 dark:text-gray-200">
+                            <span>SNI 8460-2017 (Geoteknik)</span>
+                            <span class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded font-bold uppercase">Buka</span>
+                        </a>
+                        <a href="SNI_2052-2002-2017.pdf" target="_blank" class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 flex justify-between items-center hover:bg-gray-100 dark:hover:bg-gray-600 transition text-gray-800 dark:text-gray-200">
+                            <span>SNI 2052-2017 (Tulangan)</span>
+                            <span class="text-[10px] bg-gray-200 dark:bg-gray-600 text-gray-600 dark:text-gray-300 px-2 py-1 rounded font-bold uppercase">Buka</span>
+                        </a>
                     </div>
                 </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border-l-8 border-yellow-500 shadow-sm">
+                    <h3 class="font-bold text-sm mb-4 text-yellow-800 dark:text-yellow-400 uppercase">Mekanikal & Elektrikal</h3>
+                    <div class="space-y-2 text-sm font-medium">
+                        <a href="0225 - SNI 0225-2020 Persyaratan Umum Instalasi Listrik (PUIL 2020).pdf" target="_blank" class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 flex justify-between items-center hover:bg-yellow-50 dark:hover:bg-yellow-900 transition text-gray-800 dark:text-gray-200">
+                            <span>PUIL 2020 (Listrik)</span>
+                            <span class="text-[10px] bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 px-2 py-1 rounded font-bold uppercase">Buka</span>
+                        </a>
+                        <a href="SNI 8153-2015 Sistem Plambing Pada Bangunan Gedung.pdf" target="_blank" class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 flex justify-between items-center hover:bg-yellow-50 dark:hover:bg-yellow-900 transition text-gray-800 dark:text-gray-200">
+                            <span>SNI 8153-2015 (Plambing)</span>
+                            <span class="text-[10px] bg-yellow-100 dark:bg-yellow-800 text-yellow-800 dark:text-yellow-100 px-2 py-1 rounded font-bold uppercase">Buka</span>
+                        </a>
+                    </div>
                 </div>
+
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl border-l-8 border-green-600 shadow-sm text-sm">
+                    <h3 class="font-bold mb-4 text-green-800 dark:text-green-400 uppercase">Metode Uji & Tanah</h3>
+                    <div class="space-y-2 text-sm font-medium">
+                        <a href="SNI 4153-2019 - Metode Uji Penetrasi Standar (SPT) dan Pengambilan Contoh Tanah Dengan Tabung Belah (ASTM D 1586-11, IDT).pdf" target="_blank" class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 flex justify-between items-center hover:bg-green-50 dark:hover:bg-green-900 transition text-gray-800 dark:text-gray-200">
+                            <span>SNI 4153-2019 (SPT)</span>
+                            <span class="text-[10px] bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 px-2 py-1 rounded font-bold uppercase">Buka</span>
+                        </a>
+                        <a href="SNI 8064-2016.pdf" target="_blank" class="w-full text-left p-3 bg-gray-50 dark:bg-gray-700 rounded-xl border dark:border-gray-600 flex justify-between items-center hover:bg-green-50 dark:hover:bg-green-900 transition text-gray-800 dark:text-gray-200">
+                            <span>SNI 8064-2016 (Stabilitas Lereng)</span>
+                            <span class="text-[10px] bg-green-100 dark:bg-green-800 text-green-800 dark:text-green-100 px-2 py-1 rounded font-bold uppercase">Buka</span>
+                        </a>
+                    </div>
+                </div>
+
+            </div>
         </div>
 
         <div id="content-koreksi" class="hidden animate-fadeIn text-center">
             <div class="max-w-2xl mx-auto bg-white dark:bg-gray-800 p-8 rounded-3xl border dark:border-gray-700 shadow-sm">
                 <h2 class="text-xl font-bold mb-2 text-gray-700 dark:text-gray-300 italic uppercase font-black">Validasi Excel Otomatis</h2>
-                <p class="text-xs text-gray-400 mb-8 font-medium italic">Sistem akan otomatis mengecek parameter dalam file Excel sesuai SNI.</p>
                 <div class="border-4 border-dashed border-blue-100 dark:border-gray-700 p-10 rounded-3xl mb-6">
                     <input type="file" id="excelInput" accept=".xlsx, .xls" class="hidden">
                     <label for="excelInput" class="cursor-pointer bg-blue-900 dark:bg-blue-700 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-blue-800 transition">
@@ -88,7 +135,7 @@
                     </label>
                 </div>
                 <div id="excelStatus" class="min-h-[100px] flex items-center justify-center font-bold">
-                    <p class="text-gray-300 dark:text-gray-600 italic text-sm">Menunggu data input...</p>
+                    <p class="text-gray-300 dark:text-gray-600 italic text-sm text-sm">Menunggu data input...</p>
                 </div>
             </div>
         </div>
@@ -103,15 +150,30 @@
                 </div>
             </div>
         </div>
-
     </div>
 
     <script>
-        // FUNGSI GANTI TEMA (DARK MODE)
-        const themeBtn = document.getElementById('themeBtn');
-        themeBtn.onclick = () => {
-            document.documentElement.classList.toggle('dark');
+        // TOGGLE DROPDOWN
+        const menuBtn = document.getElementById('menuBtn');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        
+        menuBtn.onclick = (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('hidden');
         };
+
+        // SET TEMA
+        function setTheme(theme) {
+            if (theme === 'dark') {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+            dropdownMenu.classList.add('hidden');
+        }
+
+        // TUTUP DROPDOWN SAAT KLIK DI LUAR
+        window.onclick = () => dropdownMenu.classList.add('hidden');
 
         // FUNGSI PINDAH TAB
         function switchTab(tab) {
@@ -120,17 +182,16 @@
                 document.getElementById('content-' + id).classList.add('hidden');
                 document.getElementById('tab-' + id).classList.remove('tab-active');
             });
-            
             document.getElementById('content-' + tab).classList.remove('hidden');
             document.getElementById('tab-' + tab).classList.add('tab-active');
         }
 
-        // LOGIC EXCEL (Sama seperti sebelumnya)
+        // LOGIC EXCEL
         document.getElementById('excelInput').addEventListener('change', function(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
             const statusDiv = document.getElementById('excelStatus');
-            statusDiv.innerHTML = '<p class="text-blue-500 animate-pulse uppercase tracking-tighter text-sm">Memproses Data SNI...</p>';
+            statusDiv.innerHTML = '<p class="text-blue-500 animate-pulse uppercase text-sm">Memproses Data SNI...</p>';
 
             reader.onload = function(event) {
                 try {
@@ -143,12 +204,12 @@
                     if (valL && valH) {
                         const hMin = Math.ceil(valL / 16);
                         if (valH >= hMin) {
-                            statusDiv.innerHTML = `<div class="bg-green-100 dark:bg-green-900 p-4 rounded-xl text-green-800 dark:text-green-100 w-full"><p class="font-black">✅ VALID</p></div>`;
+                            statusDiv.innerHTML = `<div class="bg-green-100 dark:bg-green-900 p-4 rounded-xl text-green-800 dark:text-green-100 w-full font-black">✅ VALID</div>`;
                         } else {
-                            statusDiv.innerHTML = `<div class="bg-red-100 dark:bg-red-900 p-4 rounded-xl text-red-800 dark:text-red-100 w-full"><p class="font-black">❌ TIDAK VALID</p></div>`;
+                            statusDiv.innerHTML = `<div class="bg-red-100 dark:bg-red-900 p-4 rounded-xl text-red-800 dark:text-red-100 w-full font-black">❌ TIDAK VALID</div>`;
                         }
                     } else {
-                        statusDiv.innerHTML = '<p class="text-orange-500 text-xs italic text-sm">Data B5/B6 Kosong.</p>';
+                        statusDiv.innerHTML = '<p class="text-orange-500 italic text-sm">Data B5/B6 Kosong.</p>';
                     }
                 } catch (err) {
                     statusDiv.innerHTML = '<p class="text-red-500 text-sm">Gagal baca file.</p>';
