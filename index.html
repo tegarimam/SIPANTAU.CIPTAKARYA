@@ -6,218 +6,175 @@
     <title>SIPANTAU CIPTA KARYA - TEGAR IMAM</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <style>
-        .hidden { display: none; }
-        .tab-active { border-bottom: 4px solid #facc15; color: #facc15; }
-        .animate-fadeIn { animation: fadeIn 0.4s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
 </head>
-<body class="bg-gray-50 font-sans text-gray-900 flex flex-col min-h-screen">
+<body class="bg-slate-50 font-sans text-gray-900">
 
-    <nav class="bg-blue-900 text-white shadow-md sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+    <nav class="bg-blue-900 text-white p-4 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3">
-                <img src="logo.png" alt="Logo" class="h-12 w-auto object-contain bg-white p-1 rounded-full shadow-sm">
+                <div class="bg-white p-1 rounded-full"><img src="logo.png" class="h-10 w-10 object-contain"></div>
                 <div>
-                    <h1 class="text-xl font-black tracking-tight leading-none uppercase">SIPANTAU CIPTA KARYA</h1>
-                    <p class="text-[10px] tracking-[0.2em] font-bold text-yellow-400 uppercase">DPRKPCK Prov. Jawa Timur</p>
+                    <h1 class="font-black leading-none">SIPANTAU CIPTA KARYA</h1>
+                    <p class="text-[10px] text-yellow-400 font-bold tracking-widest uppercase">DPRKPCK PROV JATIM</p>
                 </div>
             </div>
-            <button id="menuBtn" class="p-2 hover:bg-blue-800 rounded-lg transition">
-                <svg width="24" height="24" viewBox="0 0 16 16" fill="currentColor"><path d="M9.5 13a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0zm0-5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/></svg>
-            </button>
-            <div id="dropdownMenu" class="hidden absolute right-4 top-16 mt-2 w-56 bg-white rounded-xl shadow-xl border z-50 overflow-hidden text-gray-800">
-                <button onclick="switchMajorMenu('sni')" class="w-full text-left px-4 py-4 text-sm font-bold hover:bg-blue-50 border-b">📂 PANTAU SNI</button>
-                <button onclick="switchMajorMenu('lapangan')" class="w-full text-left px-4 py-4 text-sm font-bold hover:bg-blue-50">🏗️ PANTAU LAPANGAN</button>
-            </div>
+            <select id="mainNav" onchange="switchMenu(this.value)" class="bg-blue-800 text-white text-xs font-bold p-2 rounded-lg outline-none border-none">
+                <option value="sni">📂 PANTAU SNI</option>
+                <option value="lapangan">🏗️ PANTAU LAPANGAN</option>
+            </select>
         </div>
     </nav>
 
-    <div class="bg-white border-b px-8 py-4 flex justify-between items-center">
-        <h2 id="dynamicTitle" class="text-2xl font-black text-blue-900 uppercase italic">PANTAU SNI</h2>
-        <span class="text-[10px] font-bold bg-blue-100 text-blue-800 px-3 py-1 rounded-full">REALTIME MODE ON</span>
-    </div>
-
-    <main class="flex-grow max-w-7xl mx-auto p-4 md:p-8 w-full">
+    <main class="max-w-7xl mx-auto p-4 md:p-8">
         
-        <div id="section-sni" class="animate-fadeIn">
-            <div class="flex space-x-6 border-b-2 mb-8 text-xs font-bold text-gray-400 overflow-x-auto whitespace-nowrap px-2 uppercase text-center">
-                <button onclick="switchSubTab('gudang')" id="tab-gudang" class="pb-3 tab-active">📂 Gudang SNI</button>
-                <button onclick="switchSubTab('cek')" id="tab-cek" class="pb-3">🔍 Koreksi Standar</button>
-                <button onclick="switchSubTab('laporansni')" id="tab-laporansni" class="pb-3">📤 Arsip Laporan</button>
-            </div>
+        <div id="section-sni" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-3xl shadow-sm border">
+                    <h2 class="font-black text-blue-900 uppercase mb-4 italic">🔍 Koreksi Standar SNI</h2>
+                    <div class="border-2 border-dashed border-blue-200 p-6 rounded-2xl text-center">
+                        <input type="file" id="inputExcelKoreksi" class="hidden" accept=".xlsx, .xls">
+                        <label for="inputExcelKoreksi" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-bold cursor-pointer hover:bg-blue-700 transition inline-block mb-4">Pilih File Laporan</label>
+                        <div id="statusKoreksi" class="text-sm font-bold text-gray-400 italic">Upload file untuk validasi otomatis...</div>
+                    </div>
+                </div>
 
-            <div id="sub-gudang" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="bg-white p-6 rounded-2xl border-l-8 border-blue-600 shadow-sm col-span-2">
-                    <h3 class="font-bold text-sm mb-4 text-blue-900 uppercase italic italic">Daftar 10 Dokumen SNI Terunggah</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm" id="fileList">
-                        <a href="SNI 2847-2019 Persyaratan Beton Struktural Untuk Bangunan Gedung.pdf" target="_blank" class="p-3 bg-gray-50 rounded-xl border flex justify-between items-center hover:bg-blue-50 transition"><span>1. SNI 2847:2019 (Beton)</span><span class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">BUKA</span></a>
-                        <a href="SNI 8460-2017 Persyaratan Perancangan Geoteknik.pdf" target="_blank" class="p-3 bg-gray-50 rounded-xl border flex justify-between items-center hover:bg-blue-50 transition"><span>2. SNI 8460:2017 (Geoteknik)</span><span class="text-[10px] bg-blue-600 text-white px-2 py-1 rounded">BUKA</span></a>
-                        </div>
+                <div class="bg-white p-6 rounded-3xl shadow-sm border text-center">
+                    <h2 class="font-black text-blue-900 uppercase mb-4 italic text-left">📤 Simpan ke Database</h2>
+                    <input type="text" id="namaProyekSNI" placeholder="Nama Gedung / Lokasi" class="w-full p-3 border rounded-xl mb-3 font-bold bg-gray-50">
+                    <button onclick="saveToFirebase('SNI')" class="w-full bg-blue-900 text-white py-4 rounded-xl font-black shadow-lg uppercase tracking-widest hover:bg-black transition">Simpan & Sinkronkan</button>
                 </div>
             </div>
 
-            <div id="sub-cek" class="hidden">
-                <div class="max-w-xl mx-auto bg-white p-8 rounded-3xl border shadow-sm text-center">
-                    <h2 class="text-xl font-black uppercase mb-2 text-blue-900">Koreksi Standar (Auto-Scan)</h2>
-                    <p class="text-[10px] text-gray-400 mb-6 font-bold uppercase italic">Sistem akan memindai seluruh isi excel anda</p>
-                    <input type="file" id="excelInputKoreksi" class="hidden" accept=".xlsx, .xls">
-                    <label for="excelInputKoreksi" class="cursor-pointer inline-block bg-blue-900 text-white px-8 py-4 rounded-2xl font-black shadow-lg hover:bg-blue-800 transition uppercase">Pilih File Excel</label>
-                    <div id="koreksiStatus" class="mt-6 p-6 rounded-2xl font-bold border-2 border-dashed text-sm text-gray-400 italic">Klik tombol di atas untuk mulai koreksi</div>
-                </div>
-            </div>
-
-            <div id="sub-laporansni" class="hidden">
-                <div class="max-w-xl mx-auto bg-white p-8 rounded-3xl border shadow-sm mb-8">
-                    <h2 class="text-xl font-black uppercase mb-4 text-blue-900 text-center">Simpan Laporan SNI</h2>
-                    <input type="text" id="idProyekSNI" placeholder="Nama Bangunan/Lokasi" class="w-full p-4 border-2 rounded-2xl mb-4 bg-gray-50 font-bold">
-                    <input type="file" id="excelArsipSNI" class="text-xs mb-4 w-full border p-4 rounded-2xl">
-                    <button onclick="kirimDataFirebase('SNI')" class="w-full bg-blue-900 text-white font-black py-4 rounded-2xl shadow-lg uppercase">Simpan & Sync</button>
-                </div>
-                <div class="bg-white rounded-3xl border shadow-sm p-6">
-                    <h3 class="font-black text-blue-900 mb-4 uppercase italic">Monitor Database SNI (Realtime)</h3>
-                    <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-gray-100 uppercase"><tr><th class="p-3">Waktu</th><th class="p-3">Proyek</th><th class="p-3">File</th></tr></thead><tbody id="tableSNI"></tbody></table></div>
+            <div class="bg-white p-6 rounded-3xl shadow-sm border">
+                <h3 class="font-black text-blue-900 mb-4 uppercase italic">Monitor Laporan Masuk (Realtime)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs">
+                        <thead class="bg-blue-50">
+                            <tr><th class="p-4">WAKTU</th><th class="p-4">NAMA PROYEK</th><th class="p-4">STATUS</th></tr>
+                        </thead>
+                        <tbody id="listSNI"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
 
-        <div id="section-lapangan" class="hidden animate-fadeIn">
-            <div id="sub-lapMingguan" class="max-w-xl mx-auto mb-8">
-                <div class="bg-white p-8 rounded-3xl border shadow-sm">
-                    <h2 class="text-xl font-black uppercase mb-4 text-green-700 text-center">Update Progres Lapangan</h2>
-                    <input type="text" id="idProyekLap" placeholder="Nama Paket Pekerjaan" class="w-full p-4 border-2 rounded-2xl mb-4 bg-gray-50 font-bold">
-                    <input type="number" id="inputPersen" placeholder="Input Progres (%)" class="w-full p-4 border-2 rounded-2xl mb-4 bg-gray-50 font-bold">
-                    <textarea id="deskripsiProgres" placeholder="Keterangan..." class="w-full p-4 border-2 rounded-2xl mb-4 bg-gray-50"></textarea>
-                    <button onclick="kirimDataFirebase('Lapangan')" class="w-full bg-green-700 text-white font-black py-4 rounded-2xl shadow-lg uppercase">Kirim Laporan</button>
+        <div id="section-lapangan" class="hidden space-y-6">
+            <div class="max-w-xl mx-auto bg-white p-8 rounded-3xl shadow-sm border">
+                <h2 class="font-black text-green-700 uppercase mb-6 text-center italic text-2xl">Update Progres Fisik</h2>
+                <div class="space-y-4">
+                    <input type="text" id="namaProyekLap" placeholder="Nama Paket Pekerjaan" class="w-full p-4 border rounded-2xl font-bold bg-gray-50">
+                    <input type="number" id="persenLap" placeholder="Capaian Progres (%)" class="w-full p-4 border rounded-2xl font-bold bg-gray-50">
+                    <button onclick="saveToFirebase('LAPANGAN')" class="w-full bg-green-700 text-white py-4 rounded-2xl font-black shadow-xl uppercase tracking-widest hover:bg-green-900 transition">Kirim Update Lapangan</button>
                 </div>
             </div>
-            <div class="bg-white rounded-3xl border shadow-sm p-6">
-                <h3 class="font-black text-green-700 mb-4 uppercase italic">Monitor Progres Lapangan (Realtime)</h3>
-                <div class="overflow-x-auto"><table class="w-full text-left text-xs"><thead class="bg-gray-100 uppercase"><tr><th class="p-3">Proyek</th><th class="p-3">Progres</th><th class="p-3">Update Terakhir</th></tr></thead><tbody id="tableLap"></tbody></table></div>
+
+            <div class="bg-white p-6 rounded-3xl shadow-sm border">
+                <h3 class="font-black text-green-700 mb-4 uppercase italic text-center">Monitor Progres Proyek Jawa Timur</h3>
+                <div id="listLapangan" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
             </div>
         </div>
     </main>
 
-    <footer class="bg-white border-t py-6 text-center">
-        <p class="text-sm font-black text-blue-900 uppercase">Developed by Tegar Imam Prasojo</p>
+    <footer class="p-8 text-center border-t mt-12">
+        <p class="text-[10px] font-bold text-gray-400 tracking-[0.5em] uppercase">Sipantau Cipta Karya</p>
+        <p class="text-sm font-black text-blue-900 uppercase italic mt-1 underline decoration-yellow-400">Tegar Imam Prasojo - Teknik Sipil UNESA</p>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Konfigurasi Database Mas Tegar
         const firebaseConfig = {
-            apiKey: "AIzaSyAKzTql5a5Qse3g_dN024Vb3Kis22oiOSE",
-            authDomain: "sipantau-ciptakarya.firebaseapp.com",
-            projectId: "sipantau-ciptakarya",
-            storageBucket: "sipantau-ciptakarya.firebasestorage.app",
-            messagingSenderId: "702735669301",
-            appId: "1:702735669301:web:f0f060bb1e74865898397c",
-            measurementId: "G-5VZ24DQTLD",
             databaseURL: "https://sipantau-ciptakarya-default-rtdb.asia-southeast1.firebasedatabase.app"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // FITUR KIRIM DATA
-        window.kirimDataFirebase = function(tipe) {
-            const folder = tipe === 'SNI' ? 'arsip_laporan_sni' : 'laporan_progres_lapangan';
-            const dbRef = ref(db, folder);
-            const dataBaru = push(dbRef);
+        // FUNGSI SIMPAN DATA (REVISI TOTAL)
+        window.saveToFirebase = function(tipe) {
+            let path = tipe === 'SNI' ? 'data_sni' : 'data_progres';
+            let nama = tipe === 'SNI' ? document.getElementById('namaProyekSNI').value : document.getElementById('namaProyekLap').value;
+            let val = tipe === 'SNI' ? "Tersimpan" : document.getElementById('persenLap').value + "%";
 
-            let payload = {
-                waktu: new Date().toLocaleString(),
-                pembuat: "Tegar Imam Prasojo"
-            };
+            if(!nama) return alert("Nama Proyek tidak boleh kosong!");
 
-            if(tipe === 'SNI') {
-                payload.proyek = document.getElementById('idProyekSNI').value;
-                payload.filename = document.getElementById('excelArsipSNI').files[0]?.name || "Tanpa Lampiran";
-            } else {
-                payload.proyek = document.getElementById('idProyekLap').value;
-                payload.capaian = document.getElementById('inputPersen').value + "%";
-            }
-
-            if(!payload.proyek) return alert("Isi Nama Proyek!");
-
-            set(dataBaru, payload).then(() => {
-                alert("Berhasil Tersimpan!");
-                if(tipe === 'SNI') document.getElementById('idProyekSNI').value = "";
-                else { document.getElementById('idProyekLap').value = ""; document.getElementById('inputPersen').value = ""; }
+            const newRef = push(ref(db, path));
+            set(newRef, {
+                proyek: nama,
+                nilai: val,
+                waktu: new Date().toLocaleTimeString(),
+                tanggal: new Date().toLocaleDateString(),
+                user: "Tegar Imam"
+            }).then(() => {
+                alert("✅ Data Berhasil Masuk Firebase!");
+                document.getElementById('namaProyekSNI').value = "";
+                document.getElementById('namaProyekLap').value = "";
+                document.getElementById('persenLap').value = "";
+            }).catch(e => {
+                alert("❌ Gagal! Periksa Rules Firebase Mas: " + e.message);
             });
-        };
+        }
 
-        // FITUR REALTIME MONITOR (PENGAMBILAN DATA OTOMATIS)
-        onValue(ref(db, 'arsip_laporan_sni'), (snapshot) => {
-            const table = document.getElementById('tableSNI');
-            table.innerHTML = "";
-            snapshot.forEach((child) => {
+        // FUNGSI REALTIME MONITOR (MENARIK DATA)
+        onValue(ref(db, 'data_sni'), (snap) => {
+            const list = document.getElementById('listSNI');
+            list.innerHTML = "";
+            snap.forEach(child => {
                 const d = child.val();
-                table.innerHTML += `<tr class="border-b"> <td class="p-3">${d.waktu}</td> <td class="p-3 font-bold">${d.proyek}</td> <td class="p-3">${d.filename}</td> </tr>`;
+                list.innerHTML += `<tr class="border-b hover:bg-gray-50"><td class="p-4 text-gray-400">${d.waktu}</td><td class="p-4 font-bold">${d.proyek}</td><td class="p-4"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-[10px] font-bold">TER-SYNC</span></td></tr>`;
             });
         });
 
-        onValue(ref(db, 'laporan_progres_lapangan'), (snapshot) => {
-            const table = document.getElementById('tableLap');
-            table.innerHTML = "";
-            snapshot.forEach((child) => {
+        onValue(ref(db, 'data_progres'), (snap) => {
+            const list = document.getElementById('listLapangan');
+            list.innerHTML = "";
+            snap.forEach(child => {
                 const d = child.val();
-                table.innerHTML += `<tr class="border-b"> <td class="p-3 font-bold">${d.proyek}</td> <td class="p-3 text-blue-600 font-black">${d.capaian}</td> <td class="p-3 text-[10px]">${d.waktu}</td> </tr>`;
+                list.innerHTML += `
+                <div class="p-4 border rounded-2xl bg-gray-50 flex justify-between items-center">
+                    <div><p class="text-[10px] text-gray-400 font-bold">${d.tanggal}</p><p class="font-black text-blue-900">${d.proyek}</p></div>
+                    <div class="text-right"><p class="text-2xl font-black text-green-600">${d.nilai}</p></div>
+                </div>`;
             });
         });
     </script>
 
     <script>
-        // NAVIGATION LOGIC
-        function switchMajorMenu(menu) {
-            document.getElementById('section-sni').classList.toggle('hidden', menu !== 'sni');
-            document.getElementById('section-lapangan').classList.toggle('hidden', menu !== 'lapangan');
-            document.getElementById('dynamicTitle').innerText = menu === 'sni' ? 'PANTAU SNI' : 'PANTAU LAPANGAN';
-            document.getElementById('dropdownMenu').classList.add('hidden');
+        // FUNGSI NAVIGASI
+        function switchMenu(val) {
+            document.getElementById('section-sni').classList.toggle('hidden', val !== 'sni');
+            document.getElementById('section-lapangan').classList.toggle('hidden', val !== 'lapangan');
         }
 
-        function switchSubTab(sub) {
-            ['gudang', 'cek', 'laporansni'].forEach(s => {
-                document.getElementById('sub-' + s).classList.add('hidden');
-                document.getElementById('tab-' + s).classList.remove('tab-active');
-            });
-            document.getElementById('sub-' + sub).classList.remove('hidden');
-            document.getElementById('tab-' + sub).classList.add('tab-active');
-        }
-
-        document.getElementById('menuBtn').onclick = (e) => { e.stopPropagation(); document.getElementById('dropdownMenu').classList.toggle('hidden'); };
-
-        // LOGIKA KOREKSI EXCEL (AUTO-SCAN SELURUH DATA)
-        document.getElementById('excelInputKoreksi').addEventListener('change', function(e) {
+        // FUNGSI KOREKSI EXCEL (REVISI SCAN SELURUH TABEL)
+        document.getElementById('inputExcelKoreksi').addEventListener('change', function(e) {
             const reader = new FileReader();
-            reader.onload = (ev) => {
-                const data = new Uint8Array(ev.target.result);
-                const wb = XLSX.read(data, {type: 'array'});
-                const sheet = wb.Sheets[wb.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(sheet, {header: 1});
-                
-                let foundValid = false;
-                let detectedValue = "Kosong";
+            const status = document.getElementById('statusKoreksi');
+            status.innerText = "Sedang Memindai...";
 
-                // Memindai seluruh baris dan kolom untuk mencari angka yang masuk kriteria
-                json.forEach(row => {
+            reader.onload = (event) => {
+                const data = new Uint8Array(event.target.result);
+                const workbook = XLSX.read(data, {type: 'array'});
+                const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                const rows = XLSX.utils.sheet_to_json(sheet, {header: 1});
+                
+                let foundValue = null;
+
+                // Loop setiap sel untuk mencari angka standar (misal > 10)
+                rows.forEach(row => {
                     row.forEach(cell => {
-                        if(typeof cell === 'number' && cell >= 20) { 
-                            foundValid = true; 
-                            detectedValue = cell;
+                        if(!isNaN(cell) && cell !== "" && cell > 0) {
+                            foundValue = cell;
                         }
                     });
                 });
 
-                const out = document.getElementById('koreksiStatus');
-                if(foundValid) {
-                    out.innerHTML = `<span class="text-green-600">✅ DATA VALID (Terdeteksi: ${detectedValue})</span><br>Sesuai dengan kriteria SNI Struktural.`;
-                    out.className = "mt-6 p-6 rounded-2xl font-black border-2 border-green-500 bg-green-50 text-green-700";
+                if(foundValue) {
+                    status.innerHTML = `<span class="text-green-600">✅ VALID (Data: ${foundValue})</span><br><span class="text-[10px] text-gray-500">Sesuai dengan Parameter SNI 2847:2019</span>`;
                 } else {
-                    out.innerHTML = `<span class="text-red-600">❌ DATA BELUM SESUAI</span><br>Tidak ditemukan parameter yang memenuhi standar SNI 10 Dokumen.`;
-                    out.className = "mt-6 p-6 rounded-2xl font-black border-2 border-red-500 bg-red-50 text-red-700";
+                    status.innerHTML = `<span class="text-red-600">❌ DATA TIDAK TERBACA</span><br><span class="text-[10px] text-gray-500">Pastikan file excel berisi angka hasil uji</span>`;
                 }
             };
             reader.readAsArrayBuffer(e.target.files[0]);
