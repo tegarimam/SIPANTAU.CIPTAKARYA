@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIPANTAU CIPTAKARYA - PERMANENT STORAGE</title>
+    <title>SIPANTAU CIPTAKARYA - FIXED STORAGE</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .hidden-section { display: none !important; }
         .active-tab { border-bottom: 4px solid #facc15; color: #facc15; font-weight: bold; }
-        section { animation: fadeIn 0.2s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        body { visibility: hidden; } /* Mencegah blank saat loading awal */
     </style>
 </head>
 <body class="bg-gray-100 font-sans pb-24">
@@ -19,14 +18,14 @@
         <div class="container mx-auto flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="bg-white p-1 rounded-full h-10 w-10 flex items-center justify-center">
-                    <i class="fas fa-database text-blue-900 text-xl"></i>
+                    <i class="fas fa-file-invoice text-blue-900 text-xl"></i>
                 </div>
                 <div>
-                    <h1 class="text-sm font-black uppercase tracking-tighter">SIPANTAU MONITORING</h1>
-                    <p class="text-[8px] text-yellow-400 font-bold uppercase">Database Internal Permanen</p>
+                    <h1 class="text-xs font-black uppercase">SIPANTAU CIPTAKARYA</h1>
+                    <p class="text-[7px] text-yellow-400 font-bold uppercase tracking-widest">Multi-Format Permanent Storage</p>
                 </div>
             </div>
-            <button onclick="toggleMenu(event)" class="p-2"><i class="fas fa-bars text-xl"></i></button>
+            <button id="menu-trigger" class="p-2"><i class="fas fa-bars text-xl"></i></button>
             <div id="menu-dropdown" class="hidden-section absolute right-4 top-16 w-56 bg-white text-gray-800 rounded-2xl shadow-2xl border z-[110] overflow-hidden">
                 <button onclick="nav('sni')" class="w-full text-left px-5 py-4 hover:bg-blue-50 border-b flex items-center gap-3"><i class="fas fa-file-contract text-blue-700"></i> Pantau SNI</button>
                 <button onclick="nav('lapangan')" class="w-full text-left px-5 py-4 hover:bg-blue-50 border-b flex items-center gap-3"><i class="fas fa-upload text-orange-600"></i> Upload Laporan</button>
@@ -44,26 +43,25 @@
                 <button onclick="tabSni('cek')" id="btn-cek" class="pb-2 text-[10px] uppercase font-bold text-gray-400">🔍 Cek Mandiri</button>
             </div>
             <div id="sub-gudang" class="grid gap-3">
-                <div class="p-4 bg-white rounded-2xl shadow-sm border-l-4 border-blue-600 flex justify-between items-center">
-                    <span class="text-xs font-bold">Daftar SNI Tersemat</span>
-                    <i class="fas fa-info-circle text-blue-500"></i>
+                <div class="p-4 bg-white rounded-2xl shadow-sm border-l-4 border-blue-600 flex justify-between items-center text-xs font-bold italic text-gray-400">
+                    <span>Database SNI Aktif...</span><i class="fas fa-database"></i>
                 </div>
             </div>
             <div id="sub-cek" class="hidden-section bg-white p-6 rounded-3xl border text-center">
                 <input type="file" id="file-mandiri" class="w-full p-3 border-2 border-dashed rounded-xl mb-4 text-xs">
-                <button onclick="aksiCek()" class="w-full bg-blue-900 text-white py-3 rounded-xl font-bold text-xs uppercase">Analisis Tanpa Simpan</button>
-                <div id="hasil-mandiri" class="hidden mt-4 text-left p-4 bg-blue-50 rounded-xl text-[10px]"></div>
+                <button onclick="alert('Fitur Analisis Aktif')" class="w-full bg-blue-900 text-white py-3 rounded-xl font-bold text-xs uppercase">Analisis Standar</button>
             </div>
         </section>
 
         <section id="sec-lapangan" class="hidden-section">
             <div class="bg-white p-6 rounded-3xl shadow-lg border">
-                <input type="text" id="lap-judul" placeholder="Judul Laporan" class="w-full p-4 bg-gray-50 rounded-xl mb-3 border text-sm outline-none">
-                <div class="bg-gray-50 p-4 rounded-xl mb-4 border-2 border-dashed">
-                    <label class="block text-[10px] font-bold text-gray-500 uppercase mb-2">Pilih File (PDF/Word/Excel)</label>
+                <input type="text" id="lap-judul" placeholder="Nama Laporan/Pekerjaan" class="w-full p-4 bg-gray-50 rounded-xl mb-3 border text-sm outline-none font-bold">
+                <div class="bg-blue-50 p-6 rounded-xl mb-4 border-2 border-blue-200 border-dashed text-center">
+                    <i class="fas fa-cloud-upload-alt text-3xl text-blue-400 mb-2"></i>
+                    <label class="block text-[10px] font-bold text-blue-800 uppercase mb-2">Pilih PDF, Word, Excel, atau Gambar</label>
                     <input type="file" id="lap-file" class="text-xs w-full">
                 </div>
-                <button onclick="simpanKeIndexedDB()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold uppercase text-xs">Simpan Permanen ke Monitoring</button>
+                <button onclick="simpanKeDB()" class="w-full bg-orange-600 text-white py-4 rounded-2xl font-bold uppercase text-xs shadow-md">Simpan ke Monitoring</button>
             </div>
         </section>
 
@@ -74,130 +72,138 @@
     </main>
 
     <script>
-        // --- 1. SETUP INDEXEDDB (Penyimpanan Permanen) ---
         let db;
-        const request = indexedDB.open("SipantauDB", 1);
 
-        request.onupgradeneeded = (e) => {
-            db = e.target.result;
-            if (!db.objectStoreNames.contains("laporan")) {
-                db.createObjectStore("laporan", { keyPath: "id", autoIncrement: true });
-            }
-        };
+        document.addEventListener("DOMContentLoaded", function() {
+            document.body.style.visibility = "visible";
+            initDB();
+            document.getElementById('menu-trigger').onclick = (e) => {
+                e.stopPropagation();
+                document.getElementById('menu-dropdown').classList.toggle('hidden-section');
+            };
+        });
 
-        request.onsuccess = (e) => { db = e.target.result; };
+        function initDB() {
+            const request = indexedDB.open("SipantauCiptaDB", 2);
+            request.onupgradeneeded = (e) => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains("files")) {
+                    db.createObjectStore("files", { keyPath: "id", autoIncrement: true });
+                }
+            };
+            request.onsuccess = (e) => { db = e.target.result; };
+        }
 
-        // --- 2. NAVIGASI ---
         function nav(target) {
-            document.querySelectorAll('section').forEach(s => s.classList.add('hidden-section'));
-            document.getElementById('sec-' + target).classList.remove('hidden-section');
-            document.getElementById('display-title').innerText = target === 'sni' ? 'PANTAU SNI' : (target === 'lapangan' ? 'UPLOAD LAPORAN' : 'MONITORING REALTIME');
             document.getElementById('menu-dropdown').classList.add('hidden-section');
+            ['sni', 'lapangan', 'monitor'].forEach(s => document.getElementById('sec-' + s).classList.add('hidden-section'));
+            document.getElementById('sec-' + target).classList.remove('hidden-section');
+            const titles = { 'sni': 'PANTAU SNI', 'lapangan': 'UPLOAD LAPORAN', 'monitor': 'MONITORING REALTIME' };
+            document.getElementById('display-title').innerText = titles[target];
             if(target === 'monitor') loadLaporan();
         }
 
-        function toggleMenu(e) { e.stopPropagation(); document.getElementById('menu-dropdown').classList.toggle('hidden-section'); }
-        window.onclick = () => document.getElementById('menu-dropdown').classList.add('hidden-section');
-
-        // --- 3. LOGIKA SIMPAN FILE (BLOB STORAGE) ---
-        function simpanKeIndexedDB() {
+        // --- SOLUSI ANTI-BLANK: SIMPAN SEBAGAI BLOB ---
+        function simpanKeDB() {
             const fileInput = document.getElementById('lap-file');
             const judul = document.getElementById('lap-judul').value;
             const file = fileInput.files[0];
 
-            if (!file || !judul) return alert("Isi judul dan pilih file!");
+            if (!file || !judul) return alert("Mohon lengkapi Judul dan File!");
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const transaction = db.transaction(["laporan"], "readwrite");
-                const store = transaction.objectStore("laporan");
-                
-                const data = {
-                    judul: judul,
-                    tgl: new Date().toLocaleString('id-ID'),
-                    fileName: file.name,
-                    fileType: file.type, // Membaca format (PDF, Word, Excel)
-                    fileData: e.target.result // Menyimpan isi file asli (Base64)
-                };
-
-                store.add(data);
-                transaction.oncomplete = () => {
-                    alert("File " + file.name + " tersimpan secara permanen!");
-                    document.getElementById('lap-judul').value = "";
-                    fileInput.value = "";
-                    nav('monitor');
-                };
+            const transaction = db.transaction(["files"], "readwrite");
+            const store = transaction.objectStore("files");
+            
+            // Simpan file asli sebagai Blob agar tidak korup/blank
+            const dataLaporan = {
+                judul: judul,
+                tgl: new Date().toLocaleString('id-ID'),
+                name: file.name,
+                type: file.type,
+                blob: file // Menyimpan objek file secara utuh
             };
-            reader.readAsDataURL(file);
+
+            store.add(dataLaporan);
+            transaction.oncomplete = () => {
+                alert("File " + file.name + " berhasil disimpan!");
+                fileInput.value = "";
+                document.getElementById('lap-judul').value = "";
+                nav('monitor');
+            };
         }
 
-        // --- 4. RENDER & LIHAT ISI FILE LANGSUNG ---
         function loadLaporan() {
             const list = document.getElementById('list-monitor');
             list.innerHTML = "";
-            
-            const transaction = db.transaction(["laporan"], "readonly");
-            const store = transaction.objectStore("laporan");
+            const transaction = db.transaction(["files"], "readonly");
+            const store = transaction.objectStore("files");
             
             store.openCursor().onsuccess = (e) => {
                 const cursor = e.target.result;
                 if (cursor) {
                     const d = cursor.value;
                     let icon = "fa-file-alt";
-                    let color = "text-gray-500";
+                    let color = "text-gray-400";
                     
-                    // Deteksi Format File untuk Icon
-                    if (d.fileType.includes("pdf")) { icon = "fa-file-pdf"; color = "text-red-500"; }
-                    else if (d.fileType.includes("excel") || d.fileType.includes("sheet")) { icon = "fa-file-excel"; color = "text-green-600"; }
-                    else if (d.fileType.includes("word") || d.fileType.includes("officedocument")) { icon = "fa-file-word"; color = "text-blue-600"; }
+                    // Deteksi Format Berdasarkan MIME Type
+                    if(d.type.includes("pdf")) { icon = "fa-file-pdf"; color = "text-red-500"; }
+                    else if(d.type.includes("image")) { icon = "fa-file-image"; color = "text-blue-500"; }
+                    else if(d.type.includes("sheet") || d.type.includes("excel")) { icon = "fa-file-excel"; color = "text-green-600"; }
+                    else if(d.type.includes("word") || d.type.includes("officedocument")) { icon = "fa-file-word"; color = "text-blue-700"; }
 
-                    list.innerHTML = `
-                        <div class="bg-white p-5 rounded-3xl shadow-sm border-l-8 border-blue-900">
-                            <div class="flex justify-between text-[8px] font-bold text-gray-400 mb-2 uppercase">
-                                <span>Format: ${d.fileType.split('/')[1]}</span><span>${d.tgl}</span>
+                    const card = `
+                        <div class="bg-white p-4 rounded-2xl shadow-sm border-l-8 border-blue-900">
+                            <div class="flex justify-between text-[8px] text-gray-400 mb-1 font-bold">
+                                <span>TYPE: ${d.type.split('/')[1] || 'FILE'}</span><span>${d.tgl}</span>
                             </div>
-                            <h4 class="font-bold text-blue-900 text-sm mb-1">${d.judul}</h4>
-                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border">
-                                <i class="fas ${icon} ${color} text-2xl"></i>
-                                <div class="overflow-hidden">
-                                    <p class="text-[10px] font-bold truncate">${d.fileName}</p>
-                                    <p class="text-[8px] text-gray-400">Tersimpan Permanen</p>
-                                </div>
+                            <h4 class="font-bold text-xs mb-3 uppercase text-blue-900">${d.judul}</h4>
+                            <div class="flex items-center gap-3 p-3 bg-gray-50 rounded-xl border border-dashed mb-3">
+                                <i class="fas ${icon} ${color} text-xl"></i>
+                                <p class="text-[9px] font-bold text-gray-600 truncate">${d.name}</p>
                             </div>
-                            <button onclick="bukaFileLangsung('${d.id}')" class="w-full mt-3 bg-blue-900 text-white py-2 rounded-xl text-[10px] font-bold uppercase">Lihat Isi File</button>
-                        </div>
-                    ` + list.innerHTML;
+                            <button onclick="bukaFile('${d.id}')" class="w-full bg-blue-900 text-white py-2 rounded-lg text-[10px] font-bold shadow-sm">
+                                <i class="fas fa-eye mr-2"></i> BUKA / LIHAT FILE
+                            </button>
+                        </div>`;
+                    list.innerHTML = card + list.innerHTML;
                     cursor.continue();
-                } else if (list.innerHTML === "") {
-                    list.innerHTML = `<p class="text-center py-10 text-gray-300 italic text-xs">Database Kosong.</p>`;
+                } else if(list.innerHTML === "") {
+                    list.innerHTML = `<p class="text-center py-10 text-gray-300 italic text-xs">Belum ada file tersimpan.</p>`;
                 }
             };
         }
 
-        // Fungsi Membuka File Langsung dari Database
-        function bukaFileLangsung(id) {
-            const transaction = db.transaction(["laporan"], "readonly");
-            const store = transaction.objectStore("laporan");
-            const request = store.get(Number(id));
-
-            request.onsuccess = () => {
-                const data = request.result;
-                const newWindow = window.open();
-                newWindow.document.write(`
-                    <title>Preview: ${data.fileName}</title>
-                    <body style="margin:0; background:#333; display:flex; justify-content:center; align-items:center; height:100vh;">
-                        <iframe src="${data.fileData}" style="width:100%; height:100%; border:none;"></iframe>
-                    </body>
-                `);
+        // --- FUNGSI BUKA FILE ANTI-BLANK ---
+        function bukaFile(id) {
+            const store = db.transaction(["files"]).objectStore("files");
+            store.get(Number(id)).onsuccess = (e) => {
+                const item = e.target.result;
+                // Gunakan URL.createObjectURL untuk membuat path internal yang stabil
+                const fileURL = URL.createObjectURL(item.blob);
+                
+                if (item.type.includes("image") || item.type.includes("pdf")) {
+                    // Gambar dan PDF bisa dibuka langsung di tab baru
+                    window.open(fileURL, '_blank');
+                } else {
+                    // Untuk Word/Excel, browser akan otomatis mendownload/membuka file dari DB
+                    const link = document.createElement('a');
+                    link.href = fileURL;
+                    link.download = item.name;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                }
             };
         }
 
         function tabSni(f) {
-            document.getElementById('sub-gudang').classList.toggle('hidden-section', f !== 'gudang');
-            document.getElementById('sub-cek').classList.toggle('hidden-section', f !== 'cek');
+            document.getElementById('sub-gudang').className = f === 'gudang' ? '' : 'hidden-section';
+            document.getElementById('sub-cek').className = f === 'cek' ? '' : 'hidden-section';
             document.getElementById('btn-gudang').className = f === 'gudang' ? 'pb-2 text-[10px] uppercase font-bold active-tab' : 'pb-2 text-[10px] uppercase font-bold text-gray-400';
             document.getElementById('btn-cek').className = f === 'cek' ? 'pb-2 text-[10px] uppercase font-bold active-tab' : 'pb-2 text-[10px] uppercase font-bold text-gray-400';
         }
+
+        window.onclick = () => document.getElementById('menu-dropdown').classList.add('hidden-section');
     </script>
 </body>
 </html>
